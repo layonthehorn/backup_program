@@ -15,4 +15,8 @@ To use this you would either schedule its run it with a cronjob or do it yoursel
 You need to provide an argument for the backup storage location and it will
 create the required folders within it.
 Optionally you can tell it to backup your installed packages and repos. Note: This only works on Fedora Linux.
+### Manual Running
 * backup_main.py (storage_folder) (True/False)
+
+### Cron Running
+* \* \* \* \* \* /path/to/script/backup_main.py /path/to/storage true 
