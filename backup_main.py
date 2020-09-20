@@ -40,7 +40,6 @@ class Backup:
     def __init__(self):
         if os.path.exists(self.backup_location):
             self.backup_packages()
-            self.backup_config()
             for location in (".config", "music", "videos", "pictures", "documents", "games"):
                 self.backup_folder(location)
         else:
@@ -81,17 +80,15 @@ class Backup:
         shutil.make_archive(compressed_name, "gztar", "/tmp/temp_folder")
 
     def backup_folder(self, folder: str) -> None:
+        # only for .config archive to not be hidden
         if folder.startswith("."):
             new_folder: str = folder[1:]
         else:
             new_folder: str = folder
-        self.remove_extra(folder)
-        compressed_name: str = os.path.join(self.backup_location, f"{folder}/{folder.capitalize()}_{datetime.now()}")
+        self.remove_extra(new_folder)
+        compressed_name: str = os.path.join(self.backup_location, f"{new_folder}/{new_folder.capitalize()}_{datetime.now()}")
 
         shutil.make_archive(compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder.capitalize()}")
-
-    def backup_config(self) -> None:
-        pass
 
 
 Backup()
