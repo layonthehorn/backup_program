@@ -1,12 +1,11 @@
 #!/usr/bin/env python3
 
 import os
-from typing import List, Tuple
+import getpass
+from typing import List
 from datetime import datetime
 import subprocess
 import shutil
-import sys
-import re
 
 
 class FileData:
@@ -38,17 +37,14 @@ class Backup:
     # backup location
     backup_location: str = "/mnt/Mass_5400/DriveBackups/"
 
-    # files to back up
-    back_ups: Tuple[str] = ("~/Documents"
-                            , "~/Music"
-                            , "~/Videos"
-                            , "~/Pictures"
-                            , "~/.config"
-                            , "~/Games")
-
     def __init__(self):
-        self.backup_packages()
-        self.main_backup()
+        if os.path.exists(self.backup_location):
+            self.backup_packages()
+            self.backup_config()
+            for location in (".config", "music", "videos", "pictures", "documents", "games"):
+                self.backup_folder(location)
+        else:
+            print(f"Error, Backup Directory {self.backup_location} does not exist.")
 
     def remove_extra(self, dir_name: str) -> None:
         path = os.path.join(self.backup_location, dir_name)
@@ -72,7 +68,6 @@ class Backup:
             os.mkdir("/tmp/temp_folder")
         repos: str = "/tmp/temp_folder/installed_repos.txt"
         packages: str = "/tmp/temp_folder/installed_packages.txt"
-        base_name: str = os.path.join(self.backup_location, "packages")
         compressed_name: str = os.path.join(self.backup_location, f"packages/package_{datetime.now()}")
 
         # saves installed packages
@@ -85,7 +80,17 @@ class Backup:
 
         shutil.make_archive(compressed_name, "gztar", "/tmp/temp_folder")
 
-    def main_backup(self) -> None:
+    def backup_folder(self, folder: str) -> None:
+        if folder.startswith("."):
+            new_folder: str = folder[1:]
+        else:
+            new_folder: str = folder
+        self.remove_extra(folder)
+        compressed_name: str = os.path.join(self.backup_location, f"{folder}/{folder.capitalize()}_{datetime.now()}")
+
+        shutil.make_archive(compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder.capitalize()}")
+
+    def backup_config(self) -> None:
         pass
 
 
