@@ -123,13 +123,13 @@ if __name__ == "__main__":
         folder = sys.argv[1]
         packages = sys.argv[2]
         if packages.lower() == "true":
-            Backup(folder)
+            Backup(folder, True)
         elif packages.lower() == "false":
-            Backup(folder, False)
+            Backup(folder)
         else:
             print(f"Unknown Value {packages}, expected (True/False)")
 
-    # if you give a single argument defaults to saving packages too
+    # if you give a single argument defaults to not saving packages
     elif len(sys.argv) > 1:
         folder = sys.argv[1]
         Backup(folder)
