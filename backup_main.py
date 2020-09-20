@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
 
 import os
+from typing import List, Tuple
 from datetime import datetime
 import subprocess
+import shutil
 import sys
 import re
-import gzip
 
 
 class FileData:
@@ -24,9 +25,6 @@ class FileData:
     def __eq__(self, other):
         return self.age == other.age and self.path == other.path
 
-    def __str__(self):
-        return self.__path
-
     @property
     def age(self):
         return self.__age
@@ -38,15 +36,15 @@ class FileData:
 
 class Backup:
     # backup location
-    backup_location = "/mnt/Mass_5400/DriveBackups/"
+    backup_location: str = "/mnt/Mass_5400/DriveBackups/"
 
     # files to back up
-    back_ups = ("~/Documents"
-                , "~/Music"
-                , "~/Videos"
-                , "~/Pictures"
-                , "~/.config"
-                , "~/Games")
+    back_ups: Tuple[str] = ("~/Documents"
+                            , "~/Music"
+                            , "~/Videos"
+                            , "~/Pictures"
+                            , "~/.config"
+                            , "~/Games")
 
     def __init__(self):
         self.backup_packages()
@@ -56,7 +54,8 @@ class Backup:
         path = os.path.join(self.backup_location, dir_name)
         contents = os.listdir(path)
         if len(contents) >= 3:
-            age = []
+            # a list of all the files found
+            age: List[FileData] = []
             for file in contents:
                 age.append(FileData(os.stat(os.path.join(path, file)).st_mtime,
                                     os.path.join(path, file)))
@@ -67,18 +66,26 @@ class Backup:
                 pass
 
     # this backups the installed packages
-    def backup_packages(self):
+    def backup_packages(self) -> None:
         self.remove_extra("packages")
+        if not os.path.exists("/tmp/temp_folder"):
+            os.mkdir("/tmp/temp_folder")
+        repos: str = "/tmp/temp_folder/installed_repos.txt"
+        packages: str = "/tmp/temp_folder/installed_packages.txt"
+        base_name: str = os.path.join(self.backup_location, "packages")
+        compressed_name: str = os.path.join(self.backup_location, f"packages/package_{datetime.now()}")
 
         # saves installed packages
-        with open(os.path.join(self.backup_location, "packages/installed_packages.txt"), "w") as file:
+        with open(packages, "w") as file:
             subprocess.run(["rpm", "-qa"], stdout=file)
 
         # saves installed repos
-        with open(os.path.join(self.backup_location, "packages/installed_repos.txt"), "w") as file:
+        with open(repos, "w") as file:
             subprocess.run(["dnf", "repolist"], stdout=file)
 
-    def main_backup(self):
+        shutil.make_archive(compressed_name, "gztar", "/tmp/temp_folder")
+
+    def main_backup(self) -> None:
         pass
 
 
