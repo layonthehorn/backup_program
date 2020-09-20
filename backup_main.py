@@ -36,10 +36,11 @@ class FileData:
 
 
 class Backup:
-    def __init__(self, backup_location: str):
+    def __init__(self, backup_location: str, save_packages: bool = False):
         self.backup_location = backup_location
         if os.path.exists(self.backup_location):
-            self.backup_packages()
+            if save_packages:
+                self.backup_packages()
             for location in (
                 ".config",
                 "music",
@@ -116,9 +117,28 @@ class Backup:
 
 
 if __name__ == "__main__":
-    if len(sys.argv) > 1:
+
+    # if you give two arguments
+    if len(sys.argv) > 2:
         folder = sys.argv[1]
+        packages = sys.argv[2]
+        if packages.lower() == "true":
+            Backup(folder)
+        elif packages.lower() == "false":
+            Backup(folder, False)
+        else:
+            print(f"Unknown Value {packages}, expected (True/False)")
+
+    # if you give a single argument defaults to saving packages too
+    elif len(sys.argv) > 1:
+        folder = sys.argv[1]
+        Backup(folder)
+
+    # if you give no arguments
     else:
         print("Needs an argument for the backup storage location.")
+        print(
+            "Optionally, true/false for package backup - Warning: Only works on Fedora Linux."
+        )
+        print(f"{sys.argv[0]} (Backup Storage) (True/False)")
         sys.exit(0)
-    Backup(folder)
