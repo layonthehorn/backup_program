@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import sys
 import getpass
 from typing import List
 from datetime import datetime
@@ -54,6 +55,11 @@ class Backup:
 
     def remove_extra(self, dir_name: str) -> None:
         path = os.path.join(self.backup_location, dir_name)
+
+        # if the back up folder does not exist it
+        # creates it.
+        if not os.path.exists(path):
+            os.mkdir(path)
         contents = os.listdir(path)
         if len(contents) >= 3:
             # a list of all the files found
@@ -110,4 +116,9 @@ class Backup:
 
 
 if __name__ == "__main__":
-    Backup("/mnt/Mass_5400/DriveBackups/")
+    if len(sys.argv) > 1:
+        folder = sys.argv[1]
+    else:
+        print("Needs an argument for the backup storage location.")
+        sys.exit(0)
+    Backup(folder)
