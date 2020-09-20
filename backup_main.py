@@ -110,10 +110,13 @@ class Backup:
             self.backup_location,
             f"{new_folder}/{new_folder.capitalize()}_{datetime.now()}",
         )
-
-        shutil.make_archive(
-            compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder.capitalize()}"
-        )
+        if os.path.exists(f"/home/{getpass.getuser()}/{folder.capitalize()}"):
+            shutil.make_archive(
+                compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder.capitalize()}"
+            )
+        else:
+            with open(os.path.join(self.backup_location, f"{new_folder}/Error_{datetime.now()}"), "w") as file:
+                file.write(f"Could not find /home/{getpass.getuser()}/{folder.capitalize()}")
 
 
 if __name__ == "__main__":
