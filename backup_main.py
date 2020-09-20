@@ -6,6 +6,7 @@ from typing import List
 from datetime import datetime
 import subprocess
 import shutil
+from multiprocessing import Process
 
 
 class FileData:
@@ -41,7 +42,8 @@ class Backup:
         if os.path.exists(self.backup_location):
             self.backup_packages()
             for location in (".config", "music", "videos", "pictures", "documents", "games"):
-                self.backup_folder(location)
+                p = Process(target=self.backup_folder, args=(location,))
+                p.start()
         else:
             print(f"Error, Backup Directory {self.backup_location} does not exist.")
 
