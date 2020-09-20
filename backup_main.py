@@ -35,14 +35,19 @@ class FileData:
 
 
 class Backup:
-    # backup location
-    backup_location: str = "/mnt/Mass_5400/DriveBackups/"
-
-    def __init__(self):
+    def __init__(self, backup_location: str):
+        self.backup_location = backup_location
         if os.path.exists(self.backup_location):
             self.backup_packages()
-            for location in (".config", "music", "videos", "pictures", "documents", "games"):
-                p = Process(target=self.backup_folder, args=(location,))
+            for location in (
+                ".config",
+                "music",
+                "videos",
+                "pictures",
+                "documents",
+                "games",
+            ):
+                p: Process = Process(target=self.backup_folder, args=(location,))
                 p.start()
         else:
             print(f"Error, Backup Directory {self.backup_location} does not exist.")
@@ -54,8 +59,12 @@ class Backup:
             # a list of all the files found
             age: List[FileData] = []
             for file in contents:
-                age.append(FileData(os.stat(os.path.join(path, file)).st_mtime,
-                                    os.path.join(path, file)))
+                age.append(
+                    FileData(
+                        os.stat(os.path.join(path, file)).st_mtime,
+                        os.path.join(path, file),
+                    )
+                )
             age.sort()
             try:
                 os.remove(age[0].path)
@@ -69,7 +78,9 @@ class Backup:
             os.mkdir("/tmp/temp_folder")
         repos: str = "/tmp/temp_folder/installed_repos.txt"
         packages: str = "/tmp/temp_folder/installed_packages.txt"
-        compressed_name: str = os.path.join(self.backup_location, f"packages/package_{datetime.now()}")
+        compressed_name: str = os.path.join(
+            self.backup_location, f"packages/package_{datetime.now()}"
+        )
 
         # saves installed packages
         with open(packages, "w") as file:
@@ -88,9 +99,15 @@ class Backup:
         else:
             new_folder: str = folder
         self.remove_extra(new_folder)
-        compressed_name: str = os.path.join(self.backup_location, f"{new_folder}/{new_folder.capitalize()}_{datetime.now()}")
+        compressed_name: str = os.path.join(
+            self.backup_location,
+            f"{new_folder}/{new_folder.capitalize()}_{datetime.now()}",
+        )
 
-        shutil.make_archive(compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder.capitalize()}")
+        shutil.make_archive(
+            compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder.capitalize()}"
+        )
 
 
-Backup()
+if __name__ == "__main__":
+    Backup("/mnt/Mass_5400/DriveBackups/")
