@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import json
 import sys
 import getpass
 from typing import List
@@ -35,20 +36,38 @@ class FileData:
         return self.__path
 
 
+def open_json():
+    backup_locations = []
+    json_file = open("backuplist.json")
+    json_dict = json.load(json_file)
+    json_file.close()
+    for key in json_dict:
+        backup_locations.append(json_dict[key])
+
+    return tuple(backup_locations)
+
+
 class Backup:
     def __init__(self, backup_location: str, save_packages: bool = False):
         self.backup_location = backup_location
+
+        # if backup file exists get info from it
+        if os.path.exists("backuplist.json"):
+            locations = open_json()
+        # otherwise run defaults
+        else:
+            locations = (
+                ".config",
+                "Music",
+                "Videos",
+                "Pictures",
+                "Documents",
+                "Games",
+            )
         if os.path.exists(self.backup_location):
             if save_packages:
                 self.backup_packages()
-            for location in (
-                ".config",
-                "music",
-                "videos",
-                "pictures",
-                "documents",
-                "games",
-            ):
+            for location in locations:
                 p: Process = Process(target=self.backup_folder, args=(location,))
                 p.start()
         else:
@@ -108,15 +127,15 @@ class Backup:
         self.remove_extra(new_folder)
         compressed_name: str = os.path.join(
             self.backup_location,
-            f"{new_folder}/{new_folder.capitalize()}_{datetime.now()}",
+            f"{new_folder}/{new_folder}_{datetime.now()}",
         )
-        if os.path.exists(f"/home/{getpass.getuser()}/{folder.capitalize()}"):
+        if os.path.exists(f"/home/{getpass.getuser()}/{folder}"):
             shutil.make_archive(
-                compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder.capitalize()}"
+                compressed_name, "gztar", f"/home/{getpass.getuser()}/{folder}"
             )
         else:
             with open(os.path.join(self.backup_location, f"{new_folder}/Error_{datetime.now()}"), "w") as file:
-                file.write(f"Could not find /home/{getpass.getuser()}/{folder.capitalize()}")
+                file.write(f"Could not find /home/{getpass.getuser()}/{folder}")
 
 
 if __name__ == "__main__":
